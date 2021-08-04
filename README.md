@@ -9,7 +9,7 @@ Enables downloading inventory information and relavant information such as locat
 * Active CloudGenix Account
 * Python >=3.6
 * Python modules:
-    * CloudGenix Python SDK >= 5.2.1b1 - <https://github.com/CloudGenix/sdk-python>
+    * CloudGenix Python SDK >= 5.5.3b1 - <https://github.com/CloudGenix/sdk-python>
 * ProgressBar2
 
 #### License
