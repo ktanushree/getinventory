@@ -2,7 +2,10 @@
 
 """
 Get Inventory
-tanushree@cloudgenix.com
+tkamath@paloaltonetworks.com
+
+Version: 1.0.0 b2
+Date: 08/03/2021
 """
 
 import cloudgenix
@@ -18,7 +21,7 @@ from cryptography.fernet import Fernet
 SDK_VERSION = cloudgenix.version
 SCRIPT_NAME = 'CloudGenix Inventory Generator'
 
-HEADER = ["serial_number","model_name","model_type", "software_version", "site_name", "element_name", "element_role", "site_state", "element_state", "street", "city", "state", "country", "post_code", "longitude", "latitude"]
+HEADER = ["serial_number","model_name","model_type", "software_version", "site_name", "element_name", "element_role", "site_state", "element_state", "domain", "street", "city", "state", "country", "post_code", "longitude", "latitude"]
 
 
 sys.path.append(os.getcwd())
@@ -58,6 +61,78 @@ def getaddr(address):
         return addr
     else:
         return None
+
+
+
+domain_id_name = {}
+servicelabel_id_name = {}
+serviceendpoint_id_name = {}
+epid_dcsiteid = {}
+dcsiteid_domainmaplist = {}
+cg_service_labels = []
+
+
+
+def getdomainmapping(cgx_session):
+
+    # Service Labels
+    resp = cgx_session.get.servicelabels()
+    if resp.cgx_status:
+        labels = resp.cgx_content.get("items", None)
+        for lab in labels:
+            if lab["type"] == "cg-transit":
+                cg_service_labels.append(lab["id"])
+                servicelabel_id_name[lab["id"]] = lab["name"]
+
+    else:
+        print("ERR: Could not retrieve service bindings")
+        cloudgenix.jd_detailed(resp)
+
+    # Service Endpoints
+    resp = cgx_session.get.serviceendpoints()
+    if resp.cgx_status:
+        endpointlist = resp.cgx_content.get("items", None)
+        for ep in endpointlist:
+            if ep["type"] == "cg-transit":
+                serviceendpoint_id_name[ep["id"]] = ep["name"]
+                epid_dcsiteid[ep["id"]] = ep["site_id"]
+
+
+    # Service Binding Maps
+    resp = cgx_session.get.servicebindingmaps()
+    if resp.cgx_status:
+        domainlist = resp.cgx_content.get("items", None)
+
+        for domain in domainlist:
+            domain_id_name[domain["id"]] = domain["name"]
+
+            service_bindings = domain["service_bindings"]
+
+            for sb in service_bindings:
+                label_id = sb["service_label_id"]
+
+                if label_id in cg_service_labels:
+                    service_endpoints = sb["service_endpoint_ids"]
+
+                    domain_map = domain["name"] + "_" + servicelabel_id_name[label_id]
+
+                    if service_endpoints is not None:
+                        for ep in service_endpoints:
+                            dcsiteid = epid_dcsiteid[ep]
+
+                            if dcsiteid in dcsiteid_domainmaplist.keys():
+                                domainmaplist = dcsiteid_domainmaplist[dcsiteid]
+                                domainmaplist.append(domain_map)
+                                dcsiteid_domainmaplist[dcsiteid] = domainmaplist
+
+                            else:
+                                dcsiteid_domainmaplist[dcsiteid] = [domain_map]
+
+    else:
+        print("ERR: Could not retrieve service bindings")
+        cloudgenix.jd_detailed(resp)
+
+    return
 
 
 def go():
@@ -135,6 +210,11 @@ def go():
 
 
     ############################################################################
+    # Get Service Bindings
+    ############################################################################
+    getdomainmapping(cgx_session)
+
+    ############################################################################
     # Iterate through tenant_ids and get machines, elements and sites
     ############################################################################
     curtime_str = datetime.datetime.utcnow().strftime('%Y-%m-%d_%H-%M-%S')
@@ -199,8 +279,20 @@ def go():
             print("\tSites: {}".format(len(sitelist)))
 
             for site in sitelist:
+                if site["service_binding"] in domain_id_name.keys():
+                    domain = domain_id_name[site["service_binding"]]
+                else:
+                    domain = "-"
+                    if site["element_cluster_role"] == "HUB":
+                        dcsiteid = site["id"]
+
+                        if dcsiteid in dcsiteid_domainmaplist.keys():
+                            domain = dcsiteid_domainmaplist[dcsiteid]
+
+
+
                 sites[site["id"]] = {"name": site["name"], "admin_state": site["admin_state"],
-                                     "address": site["address"], "location": site["location"]}
+                                     "address": site["address"], "location": site["location"],"domain": domain}
 
 
         else:
@@ -212,16 +304,17 @@ def go():
         for item in hwidslist:
             site_name = "Unbound"
             element_name = "Unclaimed"
-            element_role = "n/a"
-            site_state = "n/a"
-            element_state = "n/a"
-            street = "n/a"
-            city = "n/a"
-            state = "n/a"
-            country = "n/a"
-            post_code = "n/a"
-            longitude = "n/a"
-            latitude = "n/a"
+            element_role = "-"
+            site_state = "-"
+            element_state = "-"
+            street = ""
+            city = ""
+            state = ""
+            country = ""
+            post_code = ""
+            longitude = ""
+            latitude = ""
+            domain = "-"
             model_type = None
             model_name = None
 
@@ -248,9 +341,18 @@ def go():
                     site_name = cursite["name"]
                     site_state = cursite["admin_state"]
                     address = cursite["address"]
+                    domain = cursite["domain"]
 
                     if address:
-                        street = "{} {}".format(address.get("street",None),address.get("street2",None))
+                        street = address.get("street",None)
+                        street2 = address.get("street2",None)
+                        if street is None:
+                            street = ""
+
+                        if street2 is None:
+                            street2 = ""
+
+                        street = "{} {}".format(street,street2)
                         city = address.get("city")
                         state = address.get("state")
                         country = address.get("country")
@@ -271,6 +373,7 @@ def go():
                 "element_role": element_role,
                 "site_state": site_state,
                 "element_state": element_state,
+                "domain": domain,
                 "street": street,
                 "city": city,
                 "state": state,
