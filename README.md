@@ -62,7 +62,8 @@ Tanushrees-MacBook-Pro:getinventory tanushreekamath$
 #### Version
 | Version | Build | Changes |
 | ------- | ----- | ------- |
-| **1.0.0** | **b1** | Initial Release. |
+| **1.0.0** | **b2** | Updated script to include domains (Service Binding Map)|
+|           | **b1** | Initial Release. |
 
 
 #### For more info
