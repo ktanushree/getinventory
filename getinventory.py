@@ -4,7 +4,7 @@
 Get Inventory
 tkamath@paloaltonetworks.com
 
-Version: 1.0.0 b2
+Version: 1.0.0 b3
 Date: 08/03/2021
 """
 
@@ -21,7 +21,7 @@ from cryptography.fernet import Fernet
 SDK_VERSION = cloudgenix.version
 SCRIPT_NAME = 'CloudGenix Inventory Generator'
 
-HEADER = ["serial_number","model_name","model_type", "software_version", "site_name", "element_name", "element_role", "site_state", "element_state", "domain", "street", "city", "state", "country", "post_code", "longitude", "latitude"]
+HEADER = ["serial_number","model_name","model_type", "software_version", "site_name", "element_name", "element_role", "site_state", "element_state", "connected", "domain", "street", "city", "state", "country", "post_code", "longitude", "latitude"]
 
 
 sys.path.append(os.getcwd())
@@ -246,7 +246,7 @@ def go():
 
                 machines[machine["sl_no"]] = {"em_element_id": em_element_id, "model_name": machine["model_name"],
                                               "software_version": machine["image_version"],
-                                              "ship_state": machine["ship_state"]}
+                                              "ship_state": machine["ship_state"], "connected": machine["connected"]}
                 hwids.append(machine["sl_no"])
 
         else:
@@ -264,7 +264,7 @@ def go():
                 elements[elem['serial_number']] = {"site_id": elem["site_id"],
                                                    "software_version": elem["software_version"],
                                                    "name": elem["name"], "role": elem["role"],
-                                                   "state": elem["state"]}
+                                                   "state": elem["state"], "connected": elem["connected"]}
 
                 elemid_siteid_dict[elem["id"]] = elem["site_id"]
 
@@ -307,6 +307,7 @@ def go():
             element_role = "-"
             site_state = "-"
             element_state = "-"
+            connected = "-
             street = ""
             city = ""
             state = ""
@@ -322,6 +323,7 @@ def go():
             ship_state = curmachine["ship_state"]
             software_version = curmachine["software_version"]
             model_name = curmachine["model_name"]
+            connected = curmachine["connected"]
 
             if "v" in model_name:
                 model_type = "Virtual"
@@ -333,6 +335,7 @@ def go():
                 software_version = curelement["software_version"]
                 element_name = curelement["name"]
                 element_state = curelement["state"]
+                connected = curelement["connected"]
                 element_role = curelement["role"]
 
                 site_id = curelement["site_id"]
@@ -373,6 +376,7 @@ def go():
                 "element_role": element_role,
                 "site_state": site_state,
                 "element_state": element_state,
+                "connected": connected,
                 "domain": domain,
                 "street": street,
                 "city": city,
