@@ -307,7 +307,7 @@ def go():
             element_role = "-"
             site_state = "-"
             element_state = "-"
-            connected = "-
+            connected = "-"
             street = ""
             city = ""
             state = ""
