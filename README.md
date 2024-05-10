@@ -1,5 +1,5 @@
-# CloudGenix Get Inventory
-This utility is used to download inventory CloudGenix managed network to a CSV file.
+# Prisma SD-WAN Get Inventory
+This utility is used to download inventory Prisma SD-WAN (CloudGenix) managed network to a CSV file.
 
 #### Synopsis
 Enables downloading inventory information and relavant information such as location, site and element state to a CSV file.
