@@ -15,7 +15,6 @@ import argparse
 import sys
 import os
 import datetime
-from cryptography.fernet import Fernet
 
 
 SDK_VERSION = cloudgenix.version
@@ -26,8 +25,8 @@ HEADER = ["serial_number","model_name","model_type", "software_version", "site_n
 
 sys.path.append(os.getcwd())
 try:
-    from cloudgenix_settings import CLOUDGENIX_CRYPTKEY, CLOUDGENIX_AUTH_TOKEN
-    print(CLOUDGENIX_CRYPTKEY,CLOUDGENIX_AUTH_TOKEN)
+    from cloudgenix_settings import CLOUDGENIX_AUTH_TOKEN
+    print(CLOUDGENIX_AUTH_TOKEN)
 
 except ImportError:
     # Get AUTH_TOKEN/X_AUTH_TOKEN from env variable, if it exists. X_AUTH_TOKEN takes priority.
