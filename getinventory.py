@@ -4,8 +4,8 @@
 Get Inventory
 tkamath@paloaltonetworks.com
 
-Version: 1.0.0 b3
-Date: 08/03/2021
+Version: 1.0.0 b4
+Date: 07/31/2024
 """
 
 import cloudgenix
@@ -19,7 +19,7 @@ from cryptography.fernet import Fernet
 
 
 SDK_VERSION = cloudgenix.version
-SCRIPT_NAME = 'CloudGenix Inventory Generator'
+SCRIPT_NAME = 'Prisma SDWAN Inventory Generator'
 
 HEADER = ["serial_number","model_name","model_type", "software_version", "site_name", "element_name", "element_role", "site_state", "element_state", "connected", "domain", "street", "city", "state", "country", "post_code", "longitude", "latitude"]
 
