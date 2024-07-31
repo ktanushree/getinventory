@@ -39,14 +39,6 @@ except ImportError:
         # not set
         CLOUDGENIX_AUTH_TOKEN = None
 
-try:
-    from cloudgenix_settings import CLOUDGENIX_USER, CLOUDGENIX_PASSWORD
-
-except ImportError:
-    # will get caught below
-    CLOUDGENIX_USER = None
-    CLOUDGENIX_PASSWORD = None
-
 
 def getaddr(address):
     if address:
@@ -152,11 +144,6 @@ def go():
     controller_group.add_argument("--insecure", "-I", help="Disable SSL certificate and hostname verification",
                                   dest='verify', action='store_false', default=True)
 
-    login_group = parser.add_argument_group('Login', 'These options allow skipping of interactive login')
-    login_group.add_argument("--email", "-E", help="Use this email as User Name instead of prompting",
-                             default=None)
-    login_group.add_argument("--pass", "-PW", help="Use this Password instead of prompting",
-                             default=None)
 
     debug_group = parser.add_argument_group('Debug', 'These options enable debugging output')
     debug_group.add_argument("--debug", "-D", help="Verbose Debug info, levels 0-2", type=int,
@@ -177,37 +164,14 @@ def go():
     print("{0} v{1} ({2})\n".format(SCRIPT_NAME, SDK_VERSION, cgx_session.controller))
 
     # login logic. Use cmdline if set, use AUTH_TOKEN next, finally user/pass from config file, then prompt.
-    # figure out user
-    if args["email"]:
-        user_email = args["email"]
-    elif CLOUDGENIX_USER:
-        user_email = CLOUDGENIX_USER
-    else:
-        user_email = None
 
-    # figure out password
-    if args["pass"]:
-        user_password = args["pass"]
-    elif CLOUDGENIX_PASSWORD:
-        user_password = CLOUDGENIX_PASSWORD
-    else:
-        user_password = None
 
     # check for token
-    if CLOUDGENIX_AUTH_TOKEN and not args["email"] and not args["pass"]:
+    if CLOUDGENIX_AUTH_TOKEN:
         cgx_session.interactive.use_token(CLOUDGENIX_AUTH_TOKEN)
         if cgx_session.tenant_id is None:
             print("AUTH_TOKEN login failure, please check token.")
             sys.exit()
-
-    else:
-        while cgx_session.tenant_id is None:
-            cgx_session.interactive.login(user_email, user_password)
-            # clear after one failed login, force relogin.
-            if not cgx_session.tenant_id:
-                user_email = None
-                user_password = None
-
 
     ############################################################################
     # Get Service Bindings
