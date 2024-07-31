@@ -62,7 +62,8 @@ Tanushrees-MacBook-Pro:getinventory tanushreekamath$
 #### Version
 | Version | Build | Changes |
 | ------- | ----- | ------- |
-| **1.0.0** | **b3** | Updated script to include device connection state|
+| **1.0.0** | **b4** | Removed support for authentication using username and password|
+|           | **b3** | Updated script to include device connection state|
 |           | **b2** | Updated script to include domains (Service Binding Map)|
 |           | **b1** | Initial Release. |
 
